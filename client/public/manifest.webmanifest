@@ -1,0 +1,9 @@
+{
+  "name": "Rural HealthConnect",
+  "short_name": "HealthConnect",
+  "start_url": "/patient/dashboard",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0b6e4f",
+  "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}

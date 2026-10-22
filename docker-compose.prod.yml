@@ -1,0 +1,44 @@
+# Production overrides:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+# Put an HTTPS terminator (load balancer / Caddy / Traefik / nginx with certificates)
+# in front of the `frontend` service. Set COOKIE_SECURE=true and CORS_ORIGIN=https://your-domain in .env.
+services:
+  postgres:
+    ports: !reset []           # never expose PostgreSQL publicly
+    restart: always
+
+  redis:
+    restart: always
+
+  backend:
+    restart: always
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    environment:
+      NODE_ENV: production
+      COOKIE_SECURE: "true"
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+
+  frontend:
+    restart: always
+    ports: !override
+      - "127.0.0.1:8080:8080"  # reachable only by the local TLS terminator
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+
+  # Optional malware scanning for uploads. Enable with: --profile clamav  and set CLAMAV_HOST=clamav
+  clamav:
+    image: clamav/clamav:stable
+    profiles: [clamav]
+    restart: always
+    networks: [backend]
